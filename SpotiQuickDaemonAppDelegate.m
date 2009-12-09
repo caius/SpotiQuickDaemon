@@ -8,7 +8,9 @@
 
 #import "SpotiQuickDaemonAppDelegate.h"
 
-#define QTIdentifier @"com.apple.QuickTimePlayerX"
+// CFBundleIdentifier's
+#define SQDQuickTimeIdentifier @"com.apple.QuickTimePlayerX"
+#define SQDSpotifyIdentifier @"com.spotify.client"
 
 @interface SpotiQuickDaemonAppDelegate ()
 
@@ -18,43 +20,44 @@
 
 @implementation SpotiQuickDaemonAppDelegate
 
-@synthesize window;
-
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
   // Register to be told about launching applications
   [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(notificationReceived:) name:NSWorkspaceWillLaunchApplicationNotification object:nil];
-  
-  NSLog(@"Quicktime Running: %@", ([self isQuickTimeRunning] ? @"YES" : @"NO"));
 }
 
 - (void) notificationReceived:(NSNotification *)notification
 {
   NSRunningApplication *app = [[notification userInfo] objectForKey:NSWorkspaceApplicationKey];
-  if ([[app bundleIdentifier] isEqual:@"com.spotify.client"]) {
-    NSLog(@"Spotify Launching!!");
+  // Check if spotify is being launched
+  if ([[app bundleIdentifier] isEqual:SQDSpotifyIdentifier]) {
+    // And then act accordingly
     [self spotifyIsLaunching];
   }
 }
 
+// Triggered when spotify is launching, and acts accordingly by opening quicktime.
 - (void) spotifyIsLaunching
 {
-  // If QT is running we don't care about anything else (yet?)
-  if ([self isQuickTimeRunning]) {
-    NSLog(@"Quicktime is running");
+  // If QT is running we don't care about anything else, just exit
+  if ([self isQuickTimeRunning])
     return;
-  }
 
-  NSLog(@"Quicktime not running");
   // It's not running, we need to open it and hide it
-  [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:QTIdentifier options:NSWorkspaceLaunchWithoutActivation|NSWorkspaceLaunchAndHide additionalEventParamDescriptor:nil launchIdentifier:nil];
+  // NSWorkspaceLaunchAndHide only seems to work the first time for some reason.
+  int launchOptions = NSWorkspaceLaunchWithoutActivation|NSWorkspaceLaunchAndHide;
+  [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:SQDQuickTimeIdentifier
+                                                       options:launchOptions
+                                additionalEventParamDescriptor:nil
+                                              launchIdentifier:nil];
 }
 
 #pragma mark Private Methods
 
+// Works out if Quicktime is open
 - (BOOL) isQuickTimeRunning
 {
   // figure this out, QTIdentifier might be useful
-  return [[NSRunningApplication runningApplicationsWithBundleIdentifier:QTIdentifier] count] != 0;
+  return [[NSRunningApplication runningApplicationsWithBundleIdentifier:SQDQuickTimeIdentifier] count] != 0;
 }
 
 @end

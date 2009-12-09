@@ -9,10 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @interface SpotiQuickDaemonAppDelegate : NSObject <NSApplicationDelegate> {
-    NSWindow *window;
 }
-
-@property (assign) IBOutlet NSWindow *window;
 
 - (void) notificationReceived:(NSNotification *)notification;
 - (void) spotifyIsLaunching;

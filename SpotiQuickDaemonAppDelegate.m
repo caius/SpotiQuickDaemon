@@ -15,6 +15,8 @@
 @interface SpotiQuickDaemonAppDelegate ()
 
 - (BOOL) isQuickTimeRunning;
+- (BOOL) isSpotifyRunning;
+- (BOOL) isApplicationRunningWithBundleIdentifier:(NSString *)identifier;
 
 @end
 
@@ -23,6 +25,10 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
   // Register to be told about launching applications
   [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(notificationReceived:) name:NSWorkspaceWillLaunchApplicationNotification object:nil];
+  
+  if ([self isSpotifyRunning]) {
+    [self spotifyIsLaunching];
+  }
 }
 
 - (void) notificationReceived:(NSNotification *)notification
@@ -56,8 +62,18 @@
 // Works out if Quicktime is open
 - (BOOL) isQuickTimeRunning
 {
+  return [self isApplicationRunningWithBundleIdentifier:SQDQuickTimeIdentifier];
+}
+
+- (BOOL) isSpotifyRunning
+{
+  return [self isApplicationRunningWithBundleIdentifier:SQDSpotifyIdentifier];
+}
+
+- (BOOL) isApplicationRunningWithBundleIdentifier:(NSString *)identifier
+{
   // figure this out, QTIdentifier might be useful
-  return [[NSRunningApplication runningApplicationsWithBundleIdentifier:SQDQuickTimeIdentifier] count] != 0;
+  return [[NSRunningApplication runningApplicationsWithBundleIdentifier:identifier] count] != 0;
 }
 
 @end

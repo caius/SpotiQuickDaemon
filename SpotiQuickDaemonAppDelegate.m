@@ -31,6 +31,15 @@
   }
 }
 
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag
+{
+  if ([self isSpotifyRunning]) {
+    [self spotifyIsLaunching];
+  }
+
+  return YES;
+}
+
 - (void) notificationReceived:(NSNotification *)notification
 {
   NSRunningApplication *app = [[notification userInfo] objectForKey:NSWorkspaceApplicationKey];

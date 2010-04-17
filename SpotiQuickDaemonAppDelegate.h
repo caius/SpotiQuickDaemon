@@ -11,7 +11,8 @@
 @interface SpotiQuickDaemonAppDelegate : NSObject <NSApplicationDelegate> {
 }
 
-- (void) notificationReceived:(NSNotification *)notification;
+- (void) launchedNotificationReceived:(NSNotification *)notification;
+- (void) terminationNotificationReceived:(NSNotification *)notification;
 - (void) spotifyIsLaunching;
 
 @end

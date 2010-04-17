@@ -14,6 +14,7 @@
 
 @interface SpotiQuickDaemonAppDelegate ()
 
+- (void) quicktimeWasTerminated;
 - (void) launchQuicktime;
 - (BOOL) isQuickTimeRunning;
 - (BOOL) isSpotifyRunning;
@@ -25,7 +26,8 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
   // Register to be told about launching applications
-  [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(notificationReceived:) name:NSWorkspaceWillLaunchApplicationNotification object:nil];
+  [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(launchedNotificationReceived:) name:NSWorkspaceWillLaunchApplicationNotification object:nil];
+  [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:self selector:@selector(terminationNotificationReceived:) name:NSWorkspaceDidTerminateApplicationNotification object:nil];
   
   if ([self isSpotifyRunning]) {
     [self spotifyIsLaunching];
@@ -41,13 +43,21 @@
   return YES;
 }
 
-- (void) notificationReceived:(NSNotification *)notification
+- (void) launchedNotificationReceived:(NSNotification *)notification
 {
   NSRunningApplication *app = [[notification userInfo] objectForKey:NSWorkspaceApplicationKey];
   // Check if spotify is being launched
   if ([[app bundleIdentifier] isEqual:SQDSpotifyIdentifier]) {
     // And then act accordingly
     [self spotifyIsLaunching];
+  }
+}
+
+- (void) terminationNotificationReceived:(NSNotification*)notification
+{
+  NSRunningApplication *app = [[notification userInfo] objectForKey:NSWorkspaceApplicationKey];
+  if ([[app bundleIdentifier] isEqual:SQDQuickTimeIdentifier]) {
+    [self quicktimeWasTerminated];
   }
 }
 
@@ -61,6 +71,12 @@
 
 #pragma mark Private Methods
 
+- (void) quicktimeWasTerminated
+{
+  if ([self isSpotifyRunning])
+    [self launchQuicktime];
+}
+
 
 - (void) launchQuicktime
 {
@@ -72,8 +88,6 @@
                                 additionalEventParamDescriptor:nil
                                               launchIdentifier:nil];
 }
-
-#pragma mark Private Methods
 
 // Works out if Quicktime is open
 - (BOOL) isQuickTimeRunning

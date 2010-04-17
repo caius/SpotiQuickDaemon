@@ -14,6 +14,7 @@
 
 @interface SpotiQuickDaemonAppDelegate ()
 
+- (void) launchQuicktime;
 - (BOOL) isQuickTimeRunning;
 - (BOOL) isSpotifyRunning;
 - (BOOL) isApplicationRunningWithBundleIdentifier:(NSString *)identifier;
@@ -53,11 +54,17 @@
 // Triggered when spotify is launching, and acts accordingly by opening quicktime.
 - (void) spotifyIsLaunching
 {
-  // If QT is running we don't care about anything else, just exit
-  if ([self isQuickTimeRunning])
-    return;
+  // If QT isn't open, open it
+  if (![self isQuickTimeRunning])
+    [self launchQuicktime];
+}
 
-  // It's not running, we need to open it and hide it
+#pragma mark Private Methods
+
+
+- (void) launchQuicktime
+{
+  // we need to open it and hide it
   // NSWorkspaceLaunchAndHide only seems to work the first time for some reason.
   int launchOptions = NSWorkspaceLaunchWithoutActivation|NSWorkspaceLaunchAndHide;
   [[NSWorkspace sharedWorkspace] launchAppWithBundleIdentifier:SQDQuickTimeIdentifier
